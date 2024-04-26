@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./sales_data.csv:/home/jovyan/work/sales_data.csv
+      - ./data_analysis.ipynb:/home/jovyan/work/data_analysis.ipynb
+      - ./Transfer_sales_Data.py:/home/jovyan/work/Transfer_sales_Data.py
+      - ./postgresql-42.7.3.jar:/home/jovyan/postgresql-42.7.3.jar
+      - ./app.py:/home/jovyan/work/app.py
+    command: >
+      bash -c "pip install pyspark && \
+      SPARK_OPTS='--conf spark.jars=./postgresql-42.7.3.jar \
+      --conf spark.driver.extraClassPath=./postgresql-42.7.3.jar' \
+      jupyter nbconvert --to notebook --execute /home/jovyan/work/data_analysis.ipynb && \
+      python /home/jovyan/work/Transfer_sales_Data.py && \
+      python /home/jovyan/work/app.py"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: "K24_DB"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "Master123!"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  sales_data_cleaned:

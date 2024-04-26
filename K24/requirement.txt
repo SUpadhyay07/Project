@@ -1,0 +1,4 @@
+pyspark
+matplotlib
+postgresql-42.7.3.jar
+pandas
